@@ -2,6 +2,8 @@ package com.todo.app.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,39 +16,48 @@ import com.todo.app.mapper.TodoMapper;
 @Controller
 public class TodoController {
 
-	@Autowired
-	TodoMapper todoMapper;
+    private static final Logger logger = LoggerFactory.getLogger(TodoController.class);
 
-	@RequestMapping(value="/")
-	public String index(Model model) {
+    @Autowired
+    TodoMapper todoMapper;
 
-//		List<Todo> list = todoMapper.selectAll();
+    @RequestMapping(value = "/")
+    public String index(Model model) {
+        logger.info("アクセス: /");
 
-		List<Todo> list = todoMapper.selectIncomplete();
-		List<Todo> doneList = todoMapper.selectComplete();
-		model.addAttribute("todos",list);
-		model.addAttribute("doneTodos",doneList);
+        List<Todo> list = todoMapper.selectIncomplete();
+        List<Todo> doneList = todoMapper.selectComplete();
 
-		return "index";
-	}
+        logger.debug("未完了タスク数: {} 件", list.size());
+        logger.debug("完了タスク数: {} 件", doneList.size());
 
-	@RequestMapping(value="/add")
-	@ResponseBody
-	public Todo add(Todo todo) {
-		todoMapper.add(todo);
-		return todo;
-	}
+        model.addAttribute("todos", list);
+        model.addAttribute("doneTodos", doneList);
 
-	@RequestMapping(value="/update")
-	@ResponseBody
-	public void update(Todo todo) {
-		todoMapper.update(todo);
-	}
+        return "index";
+    }
 
-	@RequestMapping(value="/delete")
-	@ResponseBody
-	public void delete() {
-		todoMapper.delete();
-	}
+    @RequestMapping(value = "/add")
+    @ResponseBody
+    public Todo add(Todo todo) {
+        logger.info("アクセス: /add");
+        logger.debug("追加するタスク内容: {}", todo);
+        todoMapper.add(todo);
+        return todo;
+    }
 
+    @RequestMapping(value = "/update")
+    @ResponseBody
+    public void update(Todo todo) {
+        logger.info("アクセス: /update");
+        logger.debug("更新対象のタスク: {}", todo);
+        todoMapper.update(todo);
+    }
+
+    @RequestMapping(value = "/delete")
+    @ResponseBody
+    public void delete() {
+        logger.info("アクセス: /delete");
+        todoMapper.delete();
+    }
 }
