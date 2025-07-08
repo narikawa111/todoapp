@@ -8,17 +8,15 @@ import com.todo.app.entity.Todo;
 
 @Mapper
 public interface TodoMapper {
+	List<Todo> selectAll();
 
-	public List<Todo> selectAll();
+	List<Todo> selectIncomplete();
 
-	public List<Todo> selectIncomplete();
+	List<Todo> selectComplete();
 
-	public List<Todo> selectComplete();
+	void add(Todo todo);
 
-	public void add(Todo todo);
+	void update(Todo todo);
 
-	public void update(Todo todo);
-
-	public void delete();
-
+	void delete();
 }
