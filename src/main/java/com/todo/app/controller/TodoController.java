@@ -39,37 +39,21 @@ public class TodoController {
 	public Todo add(@ModelAttribute Todo todo,
 			@RequestParam(value = "photo", required = false) MultipartFile photoFile) {
 
-		// 優先度文字列を数値に変換
-		switch (todo.getPriorityStr()) {
-		case "高":
-			todo.setPriority(3);
-			break;
-		case "中":
-			todo.setPriority(2);
-			break;
-		case "低":
-			todo.setPriority(1);
-			break;
-		default:
-			todo.setPriority(0);
+		
+		try {
+			todo.setPriority(Integer.parseInt(todo.getPriorityStr()));
+		} catch (NumberFormatException e) {
+			todo.setPriority(0); 
 		}
 
-		// カテゴリ文字列をIDに変換
-		switch (todo.getCategoryStr()) {
-		case "仕事":
-			todo.setCategoryId(1);
-			break;
-		case "私用":
-			todo.setCategoryId(2);
-			break;
-		case "その他":
-			todo.setCategoryId(3);
-			break;
-		default:
-			todo.setCategoryId(0);
+		
+		try {
+			todo.setCategoryId(Integer.parseInt(todo.getCategoryStr()));
+		} catch (NumberFormatException e) {
+			todo.setCategoryId(0); 
 		}
 
-		// ファイルアップロード処理（uploadsフォルダを作成）
+		// ファイルアップロード処理
 		if (photoFile != null && !photoFile.isEmpty()) {
 			try {
 				String filename = UUID.randomUUID().toString() + "_" + photoFile.getOriginalFilename();
@@ -82,15 +66,17 @@ public class TodoController {
 				File dest = new File(uploadDir, filename);
 				photoFile.transferTo(dest);
 
-				todo.setPhoto(filename); // DBにファイル名だけ保存
+				todo.setPhoto(filename); // DBにはファイル名のみ保存
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
+		// 初期状態では「未完了」
 		todo.setDone_flg(0);
 
-		todoMapper.add(todo); // DB登録
+		// DB登録
+		todoMapper.add(todo);
 
 		return todo;
 	}
