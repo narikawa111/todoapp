@@ -8,7 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Todo {
-
 	private long id;
 	private String title;
 	private int done_flg;
@@ -20,8 +19,6 @@ public class Todo {
 	private int parentId;
 	private int categoryId;
 
-	//受取用
-	private String priorityStr;
-	private String categoryStr;
-	
+	private String priorityStr; // 追加用
+	private String categoryStr; // 追加用
 }
