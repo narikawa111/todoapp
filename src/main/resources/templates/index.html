@@ -27,8 +27,10 @@
 					<input type="text" style="border:none;width:22rem" name="title" th:value="${todo.title}" />
 				</td>
 				<td>
-					<input type="date" style="border:none;width:22rem" name="time_limit"
-						th:value="${todo.time_limit}" />
+					<input type="date" style="border:none;width:22rem" name="time_limit" th:value="${todo.time_limit}" />
+				</td>
+				<td>
+					<img th:if="${todo.photo != null}" th:src="@{${todo.photo}}" style="max-width:100px; max-height:80px;" />
 				</td>
 			</tr>
 		</tbody>
@@ -56,6 +58,9 @@
 				<td>
 					<input type="date" style="border:none;display:none" name="time_limit"
 						th:value="${todo.time_limit}" />
+				</td>
+				<td>
+					<img th:if="${todo.photo != null}" th:src="@{${todo.photo}}" style="max-width:100px; max-height:80px;" />
 				</td>
 			</tr>
 		</tbody>

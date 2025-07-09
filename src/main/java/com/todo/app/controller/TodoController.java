@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,7 +34,7 @@ public class TodoController {
 		return "index";
 	}
 
-	@PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping("/add")
 	@ResponseBody
 	public Todo add(@ModelAttribute Todo todo,
 			@RequestParam(value = "photo", required = false) MultipartFile photoFile) {

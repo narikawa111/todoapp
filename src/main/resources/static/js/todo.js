@@ -49,12 +49,14 @@ $(function() {
 			$(this).css({ transform: 'rotate(45deg)', 'bottom': '4px' });
 		}
 	});
+
 	// 追加処理
 	$('#add').click(function(e) {
 		e.preventDefault();
 
 		const form = $('#add_form')[0];
 		const formData = new FormData(form);
+
 		$.ajax({
 			url: "/add",
 			type: "POST",
@@ -62,17 +64,26 @@ $(function() {
 			processData: false,
 			contentType: false,
 			success: function(json) {
-
+				// 既存行をクローン（イベントも含むためtrue）
 				const clone = $('#todes tr:first').clone(true);
+
+				// ID、タイトル、期限、doneフラグセット
 				clone.find('input[name="id"]').val(json.id);
 				clone.find('input[name="title"]').val(json.title);
 				clone.find('input[name="time_limit"]').val(json.time_limit);
 				clone.find('input[name="done_flg"]').prop('checked', false);
 
+				// 写真の<img>タグのsrc属性に写真URLをセット（nullなら空に）
+				if(json.photoUrl){
+					clone.find('img').attr('src', json.photoUrl).show();
+				}else{
+					clone.find('img').attr('src', '').hide();
+				}
+
+				// 新しい行をタスク一覧に追加
 				$('#todes').append(clone[0]);
 
 				form.reset();
-
 				$('#modal').modal('hide');
 			},
 			error: function(xhr, status, error) {
@@ -80,8 +91,6 @@ $(function() {
 			}
 		});
 	});
-
-
 
 	// 削除処理
 	$('#delete').click(function() {
