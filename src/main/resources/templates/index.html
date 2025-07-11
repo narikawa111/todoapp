@@ -2,161 +2,203 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<script src="webjars/jquery/3.5.1/jquery.min.js"></script>
-	<link rel="stylesheet" href="webjars/bootstrap/4.6.0/css/bootstrap.min.css" />
-	<script src="webjars/bootstrap/4.6.0/js/bootstrap.min.js"></script>
-	<link rel="stylesheet" th:href="@{/css/style.css}" />
-	<title>TodoApp</title>
+    <meta charset="UTF-8">
+    <title>TodoApp</title>
+
+    <!-- jQuery & Bootstrap -->
+    <script src="webjars/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="webjars/bootstrap/4.6.0/css/bootstrap.min.css" />
+    <script src="webjars/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+
+    <style>
+        .child-task-row {
+            background-color: #f9f9f9;
+        }
+
+        .toggle-children {
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        input[type="text"], input[type="date"] {
+            border: none;
+            width: 100%;
+        }
+    </style>
 </head>
 
-<body>
+<body class="container mt-4">
 
-	<h1>TodoList</h1>
-	<h3>マイタスク</h3>
+    <h1>Todo List</h1>
 
-	<!-- タスク一覧 -->
-	<table class="table table-borderless">
-		<tbody id="todes">
-			<tr class="todo" th:each="todo : ${todos}">
-				<td style="width:2rem">
-					<input type="checkbox" name="done_flg" />
-					<input type="hidden" name="id" th:value="${todo.id}" />
-				</td>
-				<td style="width:22rem">
-					<input type="text" style="border:none;width:22rem" name="title" th:value="${todo.title}" />
-				</td>
-				<td>
-					<input type="date" style="border:none;width:22rem" name="time_limit"
-						th:value="${todo.time_limit}" />
-				</td>
-				<td>
-					<img th:if="${todo.photo != null}" th:src="@{${todo.photo}}"
-						style="max-width:100px; max-height:80px;" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
+    <!-- タスク一覧 -->
+    <h3>未完了タスク</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>✔</th>
+                <th>タイトル</th>
+                <th>期限</th>
+                <th>写真</th>
+            </tr>
+        </thead>
+        <tbody id="todes">
+            <tr th:each="todo : ${todos}" th:attr="data-id=${todo.id}" class="parent-task todo">
+                <td>
+                    <input type="checkbox" name="done_flg" />
+                    <input type="hidden" name="id" th:value="${todo.id}" />
+                </td>
+                <td colspan="3">
+                    <button type="button" class="toggle-children btn btn-sm btn-outline-secondary">▼</button>
+                    <input type="text" name="title" th:value="${todo.title}" />
+                    <input type="date" name="time_limit" th:value="${todo.time_limit}" />
+                    <img th:if="${todo.photo != null}" th:src="@{${todo.photo}}" style="max-width:100px;" />
+                </td>
+            </tr>
+            <tr th:id="'children-' + ${todo.id}" class="child-task-row" style="display: none;">
+                <td colspan="4">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr><th>子タスク</th><th>期限</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="child : ${todo.children}">
+                                <td th:text="${child.title}">子タイトル</td>
+                                <td th:text="${#temporals.format(child.time_limit, 'yyyy-MM-dd')}">期限</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-	<!-- 完了 -->
-	<div style="font-size:20px">
-		<span id="done_count"></span>
-		<span class="pr-3">件完了</span>
-		<span class="button_for_show" style="display:inline-block"></span>
-	</div>
+    <!-- 完了タスク -->
+    <h3>完了済みタスク：<span id="done_count"></span>件</h3>
+    <button type="button" class="btn btn-sm btn-outline-secondary button_for_show">完了タスク表示/非表示</button>
 
-	<!-- 完了済み一覧 -->
-	<table class="table table-borderless" style="display:none" id="done_table">
-		<tbody id="donetodes">
-			<tr class="todo" th:each="todo : ${doneTodos}">
-				<td style="width:2rem">
-					<input type="checkbox" name="done_flg" checked />
-					<input type="hidden" name="id" th:value="${todo.id}" />
-				</td>
-				<td style="width:22rem">
-					<input type="text" style="border:none;width:22rem;text-decoration:line-through" name="title"
-						th:value="${todo.title}" />
-				</td>
-				<td>
-					<input type="date" style="border:none;display:none" name="time_limit"
-						th:value="${todo.time_limit}" />
-				</td>
-				<td>
-					<img th:if="${todo.photo != null}" th:src="@{${todo.photo}}"
-						style="max-width:100px; max-height:80px;" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
+    <table class="table table-borderless" id="done_table" style="display:none;">
+        <tbody id="donetodes">
+            <tr class="todo" th:each="todo : ${doneTodos}">
+                <td>
+                    <input type="checkbox" name="done_flg" checked />
+                    <input type="hidden" name="id" th:value="${todo.id}" />
+                </td>
+                <td colspan="3">
+                    <input type="text" name="title" th:value="${todo.title}" style="text-decoration:line-through;" />
+                    <input type="date" name="time_limit" th:value="${todo.time_limit}" style="display:none;" />
+                    <img th:if="${todo.photo != null}" th:src="@{${todo.photo}}" style="max-width:100px;" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-	<!-- モーダルを開くボタン -->
-	<button type="button" class="btn btn-light rounded-circle p-0 text-muted font-weight-bold" data-toggle="modal"
-		data-target="#modal" style="width:2.5rem;height:2.5rem;">＋</button>
+    <!-- タスク追加モーダル起動 -->
+    <button type="button" class="btn btn-light rounded-circle p-0 text-muted font-weight-bold" data-toggle="modal"
+        data-target="#modal" style="width:2.5rem;height:2.5rem;">＋</button>
 
-	<!-- モーダルウィンドウ -->
-	<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
-		<div class="modal-dialog modal-xl">
-			<div class="modal-content">
-				<div class="modal-body" style="position: relative; padding-top: 4rem;">
+    <!-- モーダル -->
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-body" style="position:relative; padding-top:4rem;">
+                    <button type="button" class="btn btn-primary" id="add"
+                        style="position:absolute; top:1rem; right:1rem;" data-dismiss="modal">追加</button>
 
-					<!-- タスク追加ボタン -->
-					<button type="button" class="btn btn-primary" id="add"
-						style="position: absolute; top: 1rem; right: 1rem;" data-dismiss="modal">
-						追加
-					</button>
-					<!-- フォーム -->
-					<form id="add_form" enctype="multipart/form-data">
+                    <form id="add_form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="text" name="title" class="form-control" placeholder="タイトル" required />
+                        </div>
+                        <div class="form-group">
+                            <input type="date" name="time_limit" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <textarea name="memo" class="form-control" placeholder="メモ" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>写真を追加</label>
+                            <input type="file" name="photo" class="form-control-file" />
+                        </div>
+                        <div class="form-group">
+                            <label>優先度：</label>
+                            <div>
+                                <input type="radio" name="priorityStr" value="1" /> 高
+                                <input type="radio" name="priorityStr" value="2" /> 中
+                                <input type="radio" name="priorityStr" value="3" /> 低
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>カテゴリ：</label>
+                            <select name="categoryStr" class="form-control">
+                                <option value="">選択してください</option>
+                                <option value="1">仕事</option>
+                                <option value="2">私用</option>
+                                <option value="3">その他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>親タスク：</label>
+                            <select name="parentId" class="form-control">
+                                <option value="">親タスクを選択（任意）</option>
+                                <option th:each="todo : ${todos}" th:value="${todo.id}"
+                                    th:text="${todo.title}"></option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-						<!-- タスクのタイトル入力 -->
-						<div class="form-group">
-							<input type="text" name="title" class="form-control" placeholder="新しいタスク" />
-						</div>
+    <!-- 完了済みタスク削除 -->
+    <button type="button" class="btn btn-outline-secondary" id="delete">完了済みを削除</button>
 
-						<!-- 日付 -->
-						<div class="form-group">
-							<input type="date" name="time_limit" class="form-control" />
-						</div>
+    <!-- スクリプト -->
+    <script th:src="@{/js/todo.js}"></script>
+    <script>
+        $(function () {
+            let doneCount = $('#donetodes').children("tr").length;
+            $('#done_count').text(doneCount);
 
-						<!-- メモ -->
-						<div class="form-group">
-							<textarea name="memo" class="form-control" placeholder="メモを入力" rows="3"
-								maxlength="150"></textarea>
-						</div>
-						<div class="form-row">
+            $('.todo input').change(function () {
+                const todo = $(this).closest('.todo');
+                const id = todo.find('input[name="id"]').val();
+                const title = todo.find('input[name="title"]').val();
+                const timeLimit = todo.find('input[name="time_limit"]').val();
+                const isDone = todo.find('input[name="done_flg"]').prop("checked");
+                const doneFlg = isDone ? 1 : 0;
 
-							<!-- 写真 -->
-							<div class="col-12 col-md-6">
-								<div class="form-group">
-									<label for="photo">写真を追加</label>
-									<input type="file" name="photo" class="form-control-file" />
-								</div>
-							</div>
+                const params = { id, title, time_limit: timeLimit, done_flg: doneFlg };
+                $.post("/update", params);
 
-							<div class="col-12 col-md-6">
+                if ($(this).prop('name') == "done_flg") {
+                    if (isDone) {
+                        todo.appendTo('#donetodes');
+                        todo.find('input[name="title"]').css('text-decoration', 'line-through');
+                        todo.find('input[name="time_limit"]').hide();
+                    } else {
+                        todo.appendTo('#todes');
+                        todo.find('input[name="title"]').css('text-decoration', 'none');
+                        todo.find('input[name="time_limit"]').show();
+                    }
+                    $('#done_count').text($('#donetodes').children("tr").length);
+                }
+            });
 
-								<!-- 優先度 -->
-								<div class="form-group d-flex align-items-center">
-									<label class="mb-0 mr-2" style="min-width:4.5rem;">優先度：</label>
-									<div class="form-check form-check-inline mb-0">
-										<input class="form-check-input" type="radio" name="priorityStr" value="1"
-											id="priorityHigh">
-										<label class="form-check-label" for="priorityHigh">高</label>
-									</div>
-									<div class="form-check form-check-inline mb-0">
-										<input class="form-check-input" type="radio" name="priorityStr" value="2"
-											id="priorityMedium">
-										<label class="form-check-label" for="priorityMedium">中</label>
-									</div>
-									<div class="form-check form-check-inline mb-0">
-										<input class="form-check-input" type="radio" name="priorityStr" value="3"
-											id="priorityLow">
-										<label class="form-check-label" for="priorityLow">低</label>
-									</div>
-								</div>
+            $('.button_for_show').click(function () {
+                $('#done_table').toggle();
+            });
 
-								<!-- カテゴリ -->
-								<div class="form-group d-flex align-items-center mt-2">
-									<label for="category" class="mb-0 mr-2" style="min-width:4.5rem;">カテゴリ：</label>
-									<select name="categoryStr" class="form-control" style="width:70%;">
-										<option value="">選択してください</option>
-										<option value="1">仕事</option>
-										<option value="2">私用</option>
-										<option value="3">その他</option>
-									</select>
-								</div>
-
-							</div>
-						</div>
-
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- 完了済み削除 -->
-	<button type="button" class="btn btn-outline-secondary" id="delete">完了済みを削除</button>
-	<script type="text/javascript" th:src="@{/js/todo.js}"></script>
+            $('.toggle-children').click(function () {
+                const parentRow = $(this).closest('tr');
+                const id = parentRow.attr('data-id');
+                $('#children-' + id).toggle();
+                $(this).text($(this).text() === "▼" ? "▲" : "▼");
+            });
+        });
+    </script>
 </body>
 
 </html>
